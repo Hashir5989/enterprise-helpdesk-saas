@@ -1,10 +1,11 @@
 <?php
 
+use App\Http\Controllers\Api\V1\AuthController;
 use App\Support\ApiResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
+    // Health check endpoint
     Route::get('/health', function () {
         return ApiResponse::success([
             'status' => 'healthy',
@@ -13,7 +14,14 @@ Route::prefix('v1')->group(function () {
         ], 'API v1 is operational');
     });
 
-    Route::middleware('auth:sanctum')->get('/me', function (Request $request) {
-        return ApiResponse::success($request->user());
+    // Auth endpoints
+    Route::prefix('auth')->group(function () {
+        Route::post('/register-tenant', [AuthController::class, 'registerTenant']);
+        Route::post('/login', [AuthController::class, 'login']);
+
+        Route::middleware('auth:sanctum')->group(function () {
+            Route::post('/logout', [AuthController::class, 'logout']);
+            Route::get('/me', [AuthController::class, 'me']);
+        });
     });
 });
