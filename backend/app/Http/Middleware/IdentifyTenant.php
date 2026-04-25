@@ -12,6 +12,8 @@ class IdentifyTenant
 {
     public function handle(Request $request, Closure $next): Response
     {
+        TenantContext::clear();
+
         $tenant = null;
 
         // 1. Check header X-Tenant-ID or X-Tenant-Slug
@@ -21,9 +23,10 @@ class IdentifyTenant
             $tenant = Tenant::where('slug', $request->header('X-Tenant-Slug'))->first();
         }
 
-        // 2. Fallback to authenticated user's tenant
-        if (! $tenant && $request->user() && $request->user()->tenant_id) {
-            $tenant = $request->user()->tenant;
+        // 2. Fallback to authenticated user (check default or sanctum guard)
+        $user = $request->user() ?? auth('sanctum')->user();
+        if (! $tenant && $user && $user->tenant_id) {
+            $tenant = Tenant::find($user->tenant_id);
         }
 
         if ($tenant) {

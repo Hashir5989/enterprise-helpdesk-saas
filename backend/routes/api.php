@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\TicketCommentController;
+use App\Http\Controllers\Api\V1\TicketController;
 use App\Support\ApiResponse;
 use Illuminate\Support\Facades\Route;
 
@@ -23,5 +25,12 @@ Route::prefix('v1')->group(function () {
             Route::post('/logout', [AuthController::class, 'logout']);
             Route::get('/me', [AuthController::class, 'me']);
         });
+    });
+
+    // Ticket & Comment Endpoints
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::apiResource('tickets', TicketController::class);
+        Route::get('tickets/{ticket}/comments', [TicketCommentController::class, 'index']);
+        Route::post('tickets/{ticket}/comments', [TicketCommentController::class, 'store']);
     });
 });
